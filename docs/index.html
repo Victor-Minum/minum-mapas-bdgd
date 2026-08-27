@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Mapas de consumo BDGD — Minum</title>
+<style>
+  :root{--bg:#0f1720;--panel:#161f2b;--ink:#e8eef5;--mut:#9fb0c3;--line:#2a3644;--acc:#4da3ff}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.55}
+  .wrap{max-width:960px;margin:0 auto;padding:48px 20px 80px}
+  h1{font-size:26px;margin:0 0 8px}
+  .sub{color:var(--mut);font-size:14.5px;margin:0 0 28px;max-width:64ch}
+  .stats{display:flex;gap:28px;flex-wrap:wrap;padding:16px 20px;background:var(--panel);
+         border:1px solid var(--line);border-radius:12px;margin-bottom:32px}
+  .stats div{font-size:13px;color:var(--mut)}
+  .stats b{display:block;font-size:22px;color:var(--ink);font-weight:650}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+  .card{display:block;background:var(--panel);border:1px solid var(--line);border-radius:12px;
+        padding:18px 20px;text-decoration:none;color:inherit;transition:border-color .15s,transform .15s}
+  .card:hover{border-color:var(--acc);transform:translateY(-2px)}
+  .card h3{margin:0 0 10px;font-size:16px}
+  .big{font-size:30px;font-weight:700;color:var(--acc);margin-bottom:12px}
+  .big span{font-size:13px;font-weight:400;color:var(--mut)}
+  .kv{display:flex;justify-content:space-between;font-size:13px;color:var(--mut);padding:2px 0}
+  .kv b{color:var(--ink);font-weight:600}
+  .ft{margin-top:12px;padding-top:10px;border-top:1px solid var(--line);font-size:11.5px;color:var(--mut)}
+  .xls{color:var(--acc);font-weight:600}
+  .nota{margin-top:36px;padding:16px 20px;border:1px solid var(--line);border-radius:12px;
+        font-size:13px;color:var(--mut)}
+  .nota b{color:var(--ink)}
+  code{background:#0b121a;padding:1px 5px;border-radius:4px;font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Mapas de consumo de energia — BDGD/ANEEL</h1>
+  <p class="sub">Unidades consumidoras de <b>baixa tensão</b> de alto consumo, por cidade, a partir da
+     Base de Dados Geográfica da Distribuidora. Cada mapa permite filtrar por setor, classe, consumo e
+     geração distribuída, e localizar uma UC pelo <b>código do medidor</b> que aparece na fatura.</p>
+  <div class="stats">
+    <div>Cidades publicadas<b>1</b></div>
+    <div>UCs no funil<b>1.122</b></div>
+    <div>Consumo mapeado<b>9.402 MWh/mês</b></div>
+  </div>
+  <div class="grid">
+      <a class="card" href="cuiaba-varzea-grande.html">
+        <h3>Cuiabá + Várzea Grande — MT</h3>
+        <div class="big">1.122<span> UCs no funil</span></div>
+        <div class="kv"><span>Consumo somado</span><b>9.402 MWh/mês</b></div>
+        <div class="kv"><span>Corte aplicado</span><b>≥ 5.000 kWh/mês</b></div>
+        <div class="kv"><span>Já tinham GD</span><b>196</b></div>
+        <div class="ft">Safra 2024-12-31 · atualizado em 27/08/2026
+          &nbsp;·&nbsp; <span class="xls" data-x="planilhas/UCs_cuiaba-varzea-grande.xlsx">planilha .xlsx</span></div>
+      </a>
+  </div>
+  <div class="nota">
+    <b>Sobre os dados.</b> Fonte: BDGD/ANEEL, safra 31/12/2024 — dado público, sem CNPJ, nome ou
+    titular. A coordenada é a do <b>poste de conexão</b>, não da fachada: prova proximidade, não
+    titularidade. O consumo é o que passou pelo medidor, então quem já tem geração própria aparece
+    com consumo residual. Clientes de <b>média tensão</b> são removidos da base: quando o mesmo
+    <code>COD_ID</code> aparece também na tabela de MT, é o mesmo cliente registrado nas duas —
+    Grupo A, fora do modelo de geração compartilhada.
+  </div>
+</div>
+<script>
+document.querySelectorAll('.xls').forEach(function(e){
+  e.addEventListener('click',function(ev){ev.preventDefault();ev.stopPropagation();
+    window.location.href=e.dataset.x;});
+});
+</script>
+</body>
+</html>

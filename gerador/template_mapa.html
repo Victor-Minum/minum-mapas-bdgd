@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>UCs de alto consumo — __TITULO__ (BDGD)</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+  :root{--bg:#0f1720;--panel:#161f2b;--ink:#e8eef5;--mut:#9fb0c3;--line:#2a3644;--acc:#4da3ff;--warn:#ffc078;}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--ink)}
+  #app{display:flex;height:100vh;overflow:hidden}
+  @supports(height:100dvh){#app{height:100dvh}}
+  #side{width:340px;flex:0 0 340px;background:var(--panel);border-right:1px solid var(--line);
+        display:flex;flex-direction:column;overflow-y:auto}
+  #map{flex:1;min-width:0}
+  .hd{padding:14px 16px;border-bottom:1px solid var(--line)}
+  .hd h1{font-size:15px;margin:0 0 3px}
+  .hd p{margin:0;font-size:12px;color:var(--mut)}
+  .count{font-size:13px;color:var(--acc);font-weight:600;margin-top:8px}
+  .sec{padding:12px 16px;border-bottom:1px solid var(--line)}
+  .sec h2{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin:0 0 8px}
+  label.chk{display:flex;align-items:center;gap:8px;font-size:13px;padding:3px 0;cursor:pointer}
+  label.chk input{accent-color:var(--acc)}
+  .dot{width:11px;height:11px;border-radius:50%;flex:0 0 11px;border:1px solid rgba(255,255,255,.4)}
+  .row{display:flex;justify-content:space-between;gap:8px}
+  .mini{font-size:11px;color:var(--mut)}
+  input[type=range]{width:100%;accent-color:var(--acc)}
+  input[type=search],input[type=text]{width:100%;padding:7px 9px;border-radius:7px;border:1px solid var(--line);
+        background:#0f1720;color:var(--ink);font-size:13px}
+  #med{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.04em;text-transform:uppercase}
+  #medst{margin-top:6px;font-size:11.5px;color:var(--mut);min-height:15px}
+  #medst.hit{color:#8ce99a}#medst.miss{color:#ff8787}
+  .btns{display:flex;gap:8px;margin-top:8px}
+  .btns button{flex:1;padding:6px;border:1px solid var(--line);background:#0f1720;color:var(--ink);
+        border-radius:7px;font-size:12px;cursor:pointer}
+  .btns button:hover{border-color:var(--acc)}
+  select{width:100%;padding:6px;border-radius:7px;border:1px solid var(--line);background:#0f1720;color:var(--ink);font-size:13px}
+  #lista{max-height:260px;overflow-y:auto;margin:0 -4px}
+  .item{padding:6px 8px;border-radius:6px;cursor:pointer;border:1px solid transparent;font-size:12px;line-height:1.35}
+  .item:hover{background:#1d2938;border-color:var(--line)}
+  .item b{color:var(--acc)}
+  .leaflet-popup-content{font-size:13px;line-height:1.45}
+  .leaflet-popup-content b{color:#0b3a6b}
+  .pill{display:inline-block;padding:1px 7px;border-radius:20px;font-size:11px;font-weight:600}
+  .gd1{background:#0b7285;color:#fff}.gd0{background:#495057;color:#fff}
+  .medbox{margin-top:5px;padding:4px 7px;background:#eef4fb;border:1px solid #cfe0f2;border-radius:5px;
+        font-family:ui-monospace,Consolas,monospace;font-size:12.5px;color:#0b3a6b;word-break:break-all}
+  a.gm{display:inline-block;margin-top:6px;color:#0563C1;font-weight:600;text-decoration:none}
+  .foot{padding:12px 16px;font-size:11px;color:var(--mut)}
+  .mobile-toggle{display:none}
+  @media(max-width:720px){
+    html,body{overflow:hidden;overscroll-behavior:none}
+    #app{display:block;position:relative}
+    #map{position:absolute;inset:0;width:100%;height:100%}
+    #side{position:absolute;z-index:1000;top:max(10px,env(safe-area-inset-top));
+      left:max(10px,env(safe-area-inset-left));right:max(10px,env(safe-area-inset-right));
+      width:auto;max-height:calc(100vh - 20px);max-height:calc(100dvh - 20px - env(safe-area-inset-top));
+      border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.42);
+      overflow:hidden;background:rgba(22,31,43,.97);backdrop-filter:blur(10px)}
+    .hd{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:10px;align-items:center;padding:10px 12px}
+    .hd h1{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0}
+    .hd p{display:none}
+    .count{font-size:11px;margin-top:3px}
+    .mobile-toggle{display:block;grid-column:2;grid-row:1 / span 2;min-width:76px;min-height:44px;
+      padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:#0f1720;
+      color:var(--ink);font-size:13px;font-weight:650;cursor:pointer;touch-action:manipulation}
+    .mobile-toggle:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+    #filters{display:none;max-height:calc(100vh - 92px);max-height:calc(100dvh - 92px - env(safe-area-inset-top));
+      overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+    #side.is-open #filters{display:block}
+    .sec{padding:11px 12px}
+    input[type=search],input[type=text],select,.btns button{min-height:44px;font-size:14px}
+    label.chk{min-height:36px;padding:5px 0}
+    input[type=range]{min-height:36px}
+    #lista{max-height:200px}
+    .leaflet-top.leaflet-right{top:70px}
+    .leaflet-control-layers{max-width:calc(100vw - 24px)}
+    .leaflet-bottom{bottom:env(safe-area-inset-bottom)}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="side">
+    <div class="hd">
+      <h1>UCs de alto consumo — __TITULO__</h1>
+      <p>Baixa tensão · consumo médio ≥ __MINCONS__ kWh/mês · BDGD/ANEEL 31/12/2024. Sem média tensão, poder público, iluminação pública, saneamento e consumo próprio.</p>
+      <div class="count" id="count"></div>
+      <button class="mobile-toggle" id="mobileFilters" type="button" aria-controls="filters" aria-expanded="false">Filtros</button>
+    </div>
+    <div id="filters">
+    <div class="sec">
+      <h2>🔎 Buscar medidor</h2>
+      <input type="text" id="med" placeholder="ex.: HKC15070056" autocomplete="off" spellcheck="false"/>
+      <div id="medst"></div>
+    </div>
+    <div class="sec">
+      <h2>Buscar (bairro, CEP, CNAE)</h2>
+      <input type="search" id="q" placeholder="bairro, CEP, CNAE ou descrição..."/>
+    </div>
+    <div class="sec">
+      <h2>Cidade</h2>
+      <div id="fcidade"></div>
+    </div>
+    <div class="sec">
+      <h2>Colorir por</h2>
+      <select id="colorby">
+        <option value="consumo">Consumo (faixas)</option>
+        <option value="classe">Classe de consumo</option>
+        <option value="gd">Geração distribuída</option>
+        <option value="cidade">Cidade</option>
+      </select>
+      <div id="legend" style="margin-top:10px"></div>
+    </div>
+    <div class="sec">
+      <h2>Consumo mínimo (kWh/mês)</h2>
+      <input type="range" id="cons" min="__MINCONS__" max="40000" step="500" value="__MINCONS__"/>
+      <div class="row mini"><span id="consval"></span><span>máx 40.000+</span></div>
+    </div>
+    <div class="sec">
+      <h2>Geração distribuída (já tem solar?)</h2>
+      <div id="fgd"></div>
+    </div>
+    <div class="sec">
+      <h2>Qualidade do cadastro</h2>
+      <label class="chk"><input type="checkbox" id="okc" checked><span>Coordenada confiável <span class="mini" id="nok"></span></span></label>
+      <label class="chk"><input type="checkbox" id="okx"><span>Coordenada a conferir (&gt;40 km do centro) <span class="mini" id="nx"></span></span></label>
+    </div>
+    <div class="sec">
+      <h2>Classe de consumo</h2>
+      <div id="fclasse"></div>
+    </div>
+    <div class="sec">
+      <h2>Setor (CNAE)</h2>
+      <div id="fsetor"></div>
+      <div class="btns"><button id="all">Marcar todos</button><button id="none">Limpar</button></div>
+    </div>
+    <div class="sec">
+      <h2>Maiores visíveis <span class="mini" id="listinfo"></span></h2>
+      <div id="lista"></div>
+      <div class="btns"><button id="csv">⬇ Baixar visíveis (CSV)</button></div>
+    </div>
+    <div class="foot">
+      <a href="index.html" style="color:var(--acc);text-decoration:none;font-weight:600">← todas as cidades</a><br><br>
+      Clique num ponto para ver detalhes e abrir no Google Maps (satélite). A coordenada é do <b>poste</b>, não da fachada — confira o entorno. UCs que dividem o mesmo poste recebem um deslocamento de poucos metros no mapa; o Excel traz a coordenada original. Consumo é o que passou pelo medidor: quem já tem geração própria aparece com consumo residual. Clientes de média tensão já foram removidos da base deste mapa. Dados públicos da BDGD/ANEEL (safra 31/12/2024) — sem CNPJ, nome ou titular.
+    </div>
+    </div>
+  </div>
+  <div id="map"></div>
+</div>
+<script>
+const DATA = __DATA__;
+
+const esri = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+  {maxZoom:19, attribution:'Tiles &copy; Esri — World Imagery'});
+const gsat = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+  {maxZoom:21, subdomains:['mt0','mt1','mt2','mt3'], attribution:'&copy; Google'});
+const ghyb = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
+  {maxZoom:21, subdomains:['mt0','mt1','mt2','mt3'], attribution:'&copy; Google'});
+const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  {maxZoom:19, attribution:'&copy; OpenStreetMap'});
+
+const map = L.map('map',{layers:[ghyb],preferCanvas:true}).setView([DATA[0].lat,DATA[0].lng],11);
+L.control.layers({'Satélite (Esri)':esri,'Satélite (Google)':gsat,'Híbrido (Google)':ghyb,'Ruas (OSM)':osm},null,{position:'topright'}).addTo(map);
+
+const CONS_BINS=[[5000,'#ffffb2','5.000–7.500'],[7500,'#fecc5c','7.500–10.000'],
+  [10000,'#fd8d3c','10.000–15.000'],[15000,'#f03b20','15.000–20.000'],[20000,'#bd0026','20.000+']];
+function consColor(v){let c=CONS_BINS[0][1];for(const b of CONS_BINS){if(v>=b[0])c=b[1];}return c;}
+const CLASSE_COL={'Comercial':'#4da3ff','Industrial':'#b25fe6','Poder Público':'#ff7b7b',
+  'Serviço Público':'#ffa94d','Rural':'#69db7c','Consumo Próprio':'#ced4da','Residencial':'#f783ac','Não informada':'#adb5bd'};
+const GD_COL={'Sim':'#0cc2c2','Nao':'#7a8797'};
+const PAL=['#4da3ff','#ffa94d','#69db7c','#b25fe6','#ff8787','#ffd43b'];
+const cidades=[...new Set(DATA.map(d=>d.ci))].sort();
+const CID_COL={}; cidades.forEach((c,i)=>CID_COL[c]=PAL[i%PAL.length]);
+const setores=[...new Set(DATA.map(d=>d.st))].sort();
+const classes=[...new Set(DATA.map(d=>d.cl))].sort();
+const gds=['Nao','Sim'];
+
+const norm=s=>(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+const key=s=>(s||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+DATA.forEach(d=>{d._m=key(d.md); d._t=norm(d.br+' '+d.cp+' '+d.cn+' '+d.cd+' '+d.ci+' '+d.st);});
+
+function mkChecks(id,vals,labels){
+  const box=document.getElementById(id);
+  vals.forEach(v=>{
+    const l=document.createElement('label');l.className='chk';
+    l.innerHTML='<input type="checkbox" checked value="'+v+'"><span>'+(labels?labels(v):v)+'</span>';
+    l.querySelector('input').addEventListener('change',render);
+    box.appendChild(l);
+  });
+}
+const cnt=(f)=>DATA.filter(f).length;
+mkChecks('fcidade',cidades,v=>v+' <span class="mini">('+cnt(d=>d.ci===v)+')</span>');
+mkChecks('fsetor',setores,v=>v+' <span class="mini">('+cnt(d=>d.st===v)+')</span>');
+mkChecks('fclasse',classes,v=>v+' <span class="mini">('+cnt(d=>d.cl===v)+')</span>');
+mkChecks('fgd',gds,v=>(v==='Sim'?'Já tem GD':'Sem GD')+' <span class="mini">('+cnt(d=>d.gd===v)+')</span>');
+
+function checked(id){return [...document.querySelectorAll('#'+id+' input:checked')].map(i=>i.value);}
+
+let layer=L.layerGroup().addTo(map);
+const marks={};
+const fmt=n=>Math.round(n).toLocaleString('pt-BR');
+
+function colorOf(d){
+  const cb=document.getElementById('colorby').value;
+  if(cb==='classe')return CLASSE_COL[d.cl]||'#ced4da';
+  if(cb==='gd')return GD_COL[d.gd]||'#7a8797';
+  if(cb==='cidade')return CID_COL[d.ci]||'#ced4da';
+  return consColor(d.km);
+}
+function radiusOf(v){return Math.max(4.5,Math.min(15, 4.5+(v-5000)/1600));}
+
+function legend(){
+  const cb=document.getElementById('colorby').value;const el=document.getElementById('legend');
+  let items=[];
+  if(cb==='consumo')items=CONS_BINS.map(b=>[b[1],b[2]+' kWh/mês']);
+  else if(cb==='classe')items=Object.entries(CLASSE_COL).filter(([k])=>classes.includes(k));
+  else if(cb==='cidade')items=cidades.map(c=>[CID_COL[c],c]);
+  else items=[['#0cc2c2','Já tem GD'],['#7a8797','Sem GD']];
+  el.innerHTML=items.map(([c,t])=>'<div class="chk"><span class="dot" style="background:'+c+'"></span><span class="mini">'+t+'</span></div>').join('');
+}
+
+function popupOf(d){
+  const gd=d.gd==='Sim';
+  return '<b>#'+d.i+' · '+d.st+'</b> <span class="mini">'+d.ci+'</span><br>'+
+    '<b>'+fmt(d.km)+'</b> kWh/mês &nbsp;·&nbsp; '+fmt(d.ka)+' kWh/ano<br>'+
+    'CNAE '+(d.cn||'—')+' — '+d.cd+'<br>'+
+    'Classe: '+d.cl+' &nbsp;·&nbsp; Carga: '+(d.ck?d.ck+' kW':'—')+' &nbsp;·&nbsp; '+(d.gt||'—')+'<br>'+
+    'GD: <span class="pill '+(gd?'gd1':'gd0')+'">'+(gd?'Já tem solar'+(d.pg?' · '+d.pg+' kW':''):'Sem GD')+'</span><br>'+
+    (d.br||'')+' — CEP '+(d.cp||'—')+'<br>'+
+    'Ligada em '+(d.dc||'—')+' &nbsp;·&nbsp; '+d.np+' UC(s) neste poste'+
+    '<br>'+
+    (d.ok?'':'<b style="color:#b02a2a">⚠ coordenada a conferir — '+d.dk+' km do centro da cidade</b><br>')+
+    (d.md?'<div class="medbox">Medidor: '+d.md+'</div>':'<div class="medbox">Medidor não localizado na EQME</div>')+
+    '<a class="gm" href="https://www.google.com/maps?q='+d.la+','+d.lo+'" target="_blank">📍 Abrir no Google Maps</a>';
+}
+
+let visiveis=[];
+function render(zoomOnSingle){
+  layer.clearLayers();
+  for(const k in marks)delete marks[k];
+  const mq=key(document.getElementById('med').value);
+  const st=document.getElementById('medst');
+  let base;
+  if(mq.length>=3){
+    base=DATA.filter(d=>d._m.includes(mq));
+    st.className=base.length?'hit':'miss';
+    st.textContent=base.length? base.length+' medidor(es) encontrado(s) — demais filtros ignorados'
+                              : 'nenhum medidor com "'+mq+'" nesta seleção';
+  }else{
+    st.className='';st.textContent=mq.length?'digite ao menos 3 caracteres':'';
+    const ciS=new Set(checked('fcidade')),setS=new Set(checked('fsetor')),
+          clS=new Set(checked('fclasse')),gdS=new Set(checked('fgd'));
+    const minC=+document.getElementById('cons').value;
+    const q=norm(document.getElementById('q').value.trim());
+    const okc=document.getElementById('okc').checked, okx=document.getElementById('okx').checked;
+    base=DATA.filter(d=>ciS.has(d.ci)&&setS.has(d.st)&&clS.has(d.cl)&&gdS.has(d.gd)
+                        &&d.km>=minC&&(!q||d._t.includes(q))
+                        &&(d.ok?okc:okx));
+  }
+  visiveis=base;
+  base.forEach(d=>{
+    const gd=d.gd==='Sim';
+    const m=L.circleMarker([d.lat,d.lng],{radius:radiusOf(d.km),
+      fillColor:colorOf(d),fillOpacity:.9,color:gd?'#0cffff':'#0b1a2a',weight:gd?3:1,
+      dashArray:gd?'3 2':null});
+    m.bindPopup(popupOf(d));
+    marks[d.i]=m;
+    layer.addLayer(m);
+  });
+  document.getElementById('count').textContent=base.length+' de '+DATA.length+' UCs visíveis';
+  legend();lista();
+  if(zoomOnSingle&&mq.length>=3&&base.length){
+    const d=base[0];map.setView([d.lat,d.lng],base.length===1?18:15);
+    if(base.length===1)marks[d.i].openPopup();
+  }
+}
+
+function lista(){
+  const el=document.getElementById('lista');
+  const top=visiveis.slice(0,150);
+  document.getElementById('listinfo').textContent=
+    visiveis.length>150?'(150 de '+visiveis.length+')':'('+visiveis.length+')';
+  el.innerHTML=top.map(d=>'<div class="item" data-i="'+d.i+'"><b>'+fmt(d.km)+
+    '</b> kWh/mês · '+d.st+'<br><span class="mini">'+d.ci+' · '+(d.br||'—')+
+    (d.md?' · med '+d.md.split(' / ')[0]:'')+'</span></div>').join('');
+  [...el.querySelectorAll('.item')].forEach(it=>it.addEventListener('click',()=>{
+    const d=visiveis.find(x=>x.i==it.dataset.i);
+    map.setView([d.lat,d.lng],18);marks[d.i].openPopup();
+    if(window.matchMedia('(max-width:720px)').matches)setMobileFilters(false);
+  }));
+}
+
+document.getElementById('csv').onclick=()=>{
+  const cols=[['i','Rank'],['ci','Cidade'],['km','kWh_mes'],['ka','kWh_ano'],['cl','Classe'],
+    ['st','Setor'],['cn','CNAE'],['cd','Descricao_CNAE'],['br','Bairro'],['cp','CEP'],
+    ['md','Medidor'],['gt','Grupo_tarifario'],['ck','Carga_kW'],['dc','Ligada_em'],
+    ['gd','Tem_GD'],['pg','Potencia_GD_kW'],['np','UCs_no_poste'],['dk','Dist_centro_km'],
+    ['la','Latitude'],['lo','Longitude']];
+  const esc=v=>'"'+String(v===null||v===undefined?'':v).replace(/"/g,'""')+'"';
+  let out=cols.map(c=>c[1]).join(';')+'\n';
+  visiveis.forEach(d=>{out+=cols.map(c=>esc(d[c[0]])).join(';')+'\n';});
+  out+='\n';
+  const b=new Blob(['﻿'+out],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);
+  a.download='UCs_visiveis.csv';a.click();URL.revokeObjectURL(a.href);
+};
+
+document.getElementById('cons').addEventListener('input',e=>{
+  document.getElementById('consval').textContent=(+e.target.value).toLocaleString('pt-BR');render();});
+document.getElementById('q').addEventListener('input',()=>render());
+document.getElementById('med').addEventListener('input',()=>render(false));
+document.getElementById('med').addEventListener('keydown',e=>{if(e.key==='Enter')render(true);});
+document.getElementById('med').addEventListener('change',()=>render(true));
+document.getElementById('colorby').addEventListener('change',()=>render());
+['okc','okx'].forEach(id=>document.getElementById(id).addEventListener('change',()=>render()));
+document.getElementById('nok').textContent='('+cnt(d=>d.ok===1)+')';
+document.getElementById('nx').textContent='('+cnt(d=>d.ok===0)+')';
+
+document.getElementById('all').onclick=()=>{document.querySelectorAll('#fsetor input').forEach(i=>i.checked=true);render();};
+document.getElementById('none').onclick=()=>{document.querySelectorAll('#fsetor input').forEach(i=>i.checked=false);render();};
+const mobileFilters=document.getElementById('mobileFilters');
+function setMobileFilters(open){
+  document.getElementById('side').classList.toggle('is-open',open);
+  mobileFilters.setAttribute('aria-expanded',String(open));
+  mobileFilters.textContent=open?'Fechar':'Filtros';
+}
+mobileFilters.addEventListener('click',()=>setMobileFilters(mobileFilters.getAttribute('aria-expanded')!=='true'));
+map.on('click',()=>{if(window.matchMedia('(max-width:720px)').matches)setMobileFilters(false);});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')setMobileFilters(false);});
+document.getElementById('consval').textContent=(__MINCONS__).toLocaleString('pt-BR');
+render();
+map.fitBounds(L.latLngBounds(DATA.map(d=>[d.lat,d.lng])).pad(0.05));
+</script>
+</body>
+</html>
