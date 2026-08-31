@@ -269,9 +269,27 @@ def main():
             "ok": (1 if bool(r.COORD_OK) else 0), "dk": float(r.DIST_CENTRO_KM),
         })
 
+    excluidas = bruto - n
+    if excluidas > 0:
+        nota_mt = (f"Clientes de média tensão foram removidos desta base: {excluidas} UCs cujo mesmo "
+                   f"COD_ID também consta na tabela de MT da distribuidora.")
+        nota_curta = f"Sem média tensão ({excluidas} UCs removidas)."
+    else:
+        nota_mt = ("<b style='color:#ffc078'>Atenção:</b> nesta distribuidora o cruzamento de média "
+                   "tensão não retorna nada — nenhum COD_ID da tabela de BT aparece na de MT. "
+                   "Esta lista <b>não tem</b> a exclusão automática de média tensão que os mapas da "
+                   "Energisa têm; confirmar em campo antes de abordar os maiores consumos.")
+        nota_curta = "Sem exclusão automática de média tensão nesta distribuidora — ver rodapé."
+    teto = int(max(40000, min(df["KWH_MES"].max(), 200000)))
+    teto = int(round(teto / 5000.0) * 5000)
+
     tpl = open(os.path.join(AQUI, "template_mapa.html"), encoding="utf-8").read()
     html = (tpl.replace("__TITULO__", a.titulo)
                .replace("__MINCONS__", str(int(a.min)))
+               .replace("__MAXCONS_FMT__", f"{teto:,}".replace(",", ".") + "+")
+               .replace("__MAXCONS__", str(teto))
+               .replace("__NOTA_MT_CURTA__", nota_curta)
+               .replace("__NOTA_MT__", nota_mt)
                .replace("__NUCS__", str(len(dados)))
                .replace("__DATA__", json.dumps(dados, ensure_ascii=False, separators=(",", ":"))))
     hf = os.path.join(a.docs, f"{a.slug}.html")
@@ -291,7 +309,7 @@ def main():
         "slug": a.slug, "titulo": a.titulo, "uf": a.uf,
         "cidades": [nomes[m] for m in muns], "min": int(a.min),
         "ucs": int(len(df)),
-        "excluidas_mt": int(bruto - n),
+        "excluidas_mt": int(excluidas),
         "kwh_mes": int(df["KWH_MES"].sum()),
         "com_gd": int((df["Tem_GD"] == "Sim").sum()),
         "planilha": "planilhas/" + os.path.basename(xls),

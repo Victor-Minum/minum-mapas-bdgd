@@ -86,7 +86,7 @@
   <div id="side">
     <div class="hd">
       <h1>UCs de alto consumo — __TITULO__</h1>
-      <p>Baixa tensão · consumo médio ≥ __MINCONS__ kWh/mês · BDGD/ANEEL 31/12/2024. Sem média tensão, poder público, iluminação pública, saneamento e consumo próprio.</p>
+      <p>Baixa tensão · consumo médio ≥ __MINCONS__ kWh/mês · BDGD/ANEEL 31/12/2024. Sem poder público, iluminação pública, saneamento e consumo próprio. __NOTA_MT_CURTA__</p>
       <div class="count" id="count"></div>
       <button class="mobile-toggle" id="mobileFilters" type="button" aria-controls="filters" aria-expanded="false">Filtros</button>
     </div>
@@ -116,8 +116,8 @@
     </div>
     <div class="sec">
       <h2>Consumo mínimo (kWh/mês)</h2>
-      <input type="range" id="cons" min="__MINCONS__" max="40000" step="500" value="__MINCONS__"/>
-      <div class="row mini"><span id="consval"></span><span>máx 40.000+</span></div>
+      <input type="range" id="cons" min="__MINCONS__" max="__MAXCONS__" step="500" value="__MINCONS__"/>
+      <div class="row mini"><span id="consval"></span><span>máx __MAXCONS_FMT__</span></div>
     </div>
     <div class="sec">
       <h2>Geração distribuída (já tem solar?)</h2>
@@ -144,7 +144,7 @@
     </div>
     <div class="foot">
       <a href="index.html" style="color:var(--acc);text-decoration:none;font-weight:600">← todas as cidades</a><br><br>
-      Clique num ponto para ver detalhes e abrir no Google Maps (satélite). A coordenada é do <b>poste</b>, não da fachada — confira o entorno. UCs que dividem o mesmo poste recebem um deslocamento de poucos metros no mapa; o Excel traz a coordenada original. Consumo é o que passou pelo medidor: quem já tem geração própria aparece com consumo residual. Clientes de média tensão já foram removidos da base deste mapa. Dados públicos da BDGD/ANEEL (safra 31/12/2024) — sem CNPJ, nome ou titular.
+      Clique num ponto para ver detalhes e abrir no Google Maps (satélite). A coordenada é do <b>poste</b>, não da fachada — confira o entorno. UCs que dividem o mesmo poste recebem um deslocamento de poucos metros no mapa; o Excel traz a coordenada original. Consumo é o que passou pelo medidor: quem já tem geração própria aparece com consumo residual. __NOTA_MT__ Dados públicos da BDGD/ANEEL (safra 31/12/2024) — sem CNPJ, nome ou titular.
     </div>
     </div>
   </div>

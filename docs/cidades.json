@@ -1,5 +1,23 @@
 [
  {
+  "slug": "acailandia-joao-lisboa-davinopolis",
+  "titulo": "Açailândia + João Lisboa + Davinópolis — MA",
+  "uf": "MA",
+  "cidades": [
+   "Açailândia",
+   "João Lisboa",
+   "Davinópolis"
+  ],
+  "min": 5000,
+  "ucs": 71,
+  "excluidas_mt": 0,
+  "kwh_mes": 618973,
+  "com_gd": 8,
+  "planilha": "planilhas/UCs_acailandia-joao-lisboa-davinopolis.xlsx",
+  "atualizado": "2026-08-31",
+  "safra": "2024-12-31"
+ },
+ {
   "slug": "cuiaba-varzea-grande",
   "titulo": "Cuiabá + Várzea Grande — MT",
   "uf": "MT",
@@ -13,7 +31,7 @@
   "kwh_mes": 9401506,
   "com_gd": 196,
   "planilha": "planilhas/UCs_cuiaba-varzea-grande.xlsx",
-  "atualizado": "2026-08-27",
+  "atualizado": "2026-08-31",
   "safra": "2024-12-31"
  }
 ]
