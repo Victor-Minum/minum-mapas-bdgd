@@ -6,6 +6,8 @@
 <title>UCs de alto consumo — __TITULO__ (BDGD)</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>__MC_CSS__</style>
+<script>__MC_JS__</script>
 <style>
   :root{--bg:#0f1720;--panel:#161f2b;--ink:#e8eef5;--mut:#9fb0c3;--line:#2a3644;--acc:#4da3ff;--warn:#ffc078;}
   *{box-sizing:border-box}
@@ -79,6 +81,22 @@
     .leaflet-control-layers{max-width:calc(100vw - 24px)}
     .leaflet-bottom{bottom:env(safe-area-inset-bottom)}
   }
+  .chip{display:inline-block;margin:5px 5px 0 0;padding:3px 9px;border-radius:20px;background:#1d2938;
+        border:1px solid var(--line);font-size:12px;cursor:pointer;line-height:1.6}
+  .chip:hover{border-color:var(--acc)}
+  .chip.lim{background:transparent;color:var(--mut)}
+  #cidsug{max-height:210px;overflow-y:auto;margin:6px -4px 0}
+  #cidchips{margin-bottom:2px}
+  #cidst{margin-top:7px}
+  #topBox{max-height:300px;overflow-y:auto;margin:0 -4px}
+  .item.on{background:#1b3550;border-color:var(--acc)}
+  h2.toggle{cursor:pointer;user-select:none;display:flex;justify-content:space-between;align-items:center}
+  h2.toggle:hover{color:var(--ink)}
+  .clw{background:none;border:none}
+  .cl{width:100%;height:100%;border-radius:50%;display:flex;align-items:center;justify-content:center;
+      background:rgba(77,163,255,.85);border:2px solid rgba(255,255,255,.9);color:#06101c;
+      font-weight:700;font-size:12.5px;box-shadow:0 2px 9px rgba(0,0,0,.4)}
+  .marker-cluster-small,.marker-cluster-medium,.marker-cluster-large{background:none}
 </style>
 </head>
 <body>
@@ -103,6 +121,16 @@
     <div class="sec">
       <h2>Cidade</h2>
       <div id="fcidade"></div>
+      <div id="cidBusca" hidden>
+        <input type="search" id="cidq" placeholder="digite o nome da cidade..." autocomplete="off"/>
+        <div id="cidsug"></div>
+        <div id="cidchips"></div>
+        <div class="mini" id="cidst"></div>
+      </div>
+    </div>
+    <div class="sec" id="secTop" hidden>
+      <h2 class="toggle" id="topHd"><span>Top 20 cidades</span><span id="topSeta">▸</span></h2>
+      <div id="topBox" hidden></div>
     </div>
     <div class="sec">
       <h2>Colorir por</h2>
@@ -126,7 +154,7 @@
     <div class="sec">
       <h2>Qualidade do cadastro</h2>
       <label class="chk"><input type="checkbox" id="okc" checked><span>Coordenada confiável <span class="mini" id="nok"></span></span></label>
-      <label class="chk"><input type="checkbox" id="okx"><span>Coordenada a conferir (&gt;40 km do centro) <span class="mini" id="nx"></span></span></label>
+      <label class="chk"><input type="checkbox" id="okx"><span>Coordenada a conferir (fora do padrão da cidade) <span class="mini" id="nx"></span></span></label>
     </div>
     <div class="sec">
       <h2>Classe de consumo</h2>
@@ -152,6 +180,9 @@
 </div>
 <script>
 const DATA = __DATA__;
+// Com cluster o renderer canvas deixa pontos "fantasma" pintados depois de agrupados:
+// nesse caso usamos SVG, que o markercluster limpa corretamente.
+const CLUSTER = DATA.length > 2000;
 
 const esri = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
   {maxZoom:19, attribution:'Tiles &copy; Esri — World Imagery'});
@@ -162,7 +193,7 @@ const ghyb = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
 const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
   {maxZoom:19, attribution:'&copy; OpenStreetMap'});
 
-const map = L.map('map',{layers:[ghyb],preferCanvas:true}).setView([DATA[0].lat,DATA[0].lng],11);
+const map = L.map('map',{layers:[ghyb],preferCanvas:!CLUSTER}).setView([DATA[0].lat,DATA[0].lng],11);
 L.control.layers({'Satélite (Esri)':esri,'Satélite (Google)':gsat,'Híbrido (Google)':ghyb,'Ruas (OSM)':osm},null,{position:'topright'}).addTo(map);
 
 const CONS_BINS=[[5000,'#ffffb2','5.000–7.500'],[7500,'#fecc5c','7.500–10.000'],
@@ -192,14 +223,36 @@ function mkChecks(id,vals,labels){
   });
 }
 const cnt=(f)=>DATA.filter(f).length;
-mkChecks('fcidade',cidades,v=>v+' <span class="mini">('+cnt(d=>d.ci===v)+')</span>');
+const CIDN={}; cidades.forEach(c=>CIDN[c]=cnt(d=>d.ci===c));
+const MODO_BUSCA = cidades.length > 8;
+const selCid = new Set();
+if(!MODO_BUSCA){
+  mkChecks('fcidade',cidades,v=>v+' <span class="mini">('+CIDN[v]+')</span>');
+}else{
+  document.getElementById('fcidade').hidden=true;
+  document.getElementById('cidBusca').hidden=false;
+  document.getElementById('secTop').hidden=false;
+}
 mkChecks('fsetor',setores,v=>v+' <span class="mini">('+cnt(d=>d.st===v)+')</span>');
 mkChecks('fclasse',classes,v=>v+' <span class="mini">('+cnt(d=>d.cl===v)+')</span>');
 mkChecks('fgd',gds,v=>(v==='Sim'?'Já tem GD':'Sem GD')+' <span class="mini">('+cnt(d=>d.gd===v)+')</span>');
 
 function checked(id){return [...document.querySelectorAll('#'+id+' input:checked')].map(i=>i.value);}
 
-let layer=L.layerGroup().addTo(map);
+let layer = CLUSTER ? L.markerClusterGroup({
+    chunkedLoading:true, showCoverageOnHover:false, spiderfyOnMaxZoom:true,
+    disableClusteringAtZoom:15,
+    // longe agrupa muito, perto vai soltando
+    maxClusterRadius:function(z){ return z<8?110 : z<10?85 : z<12?60 : 45; },
+    iconCreateFunction:function(c){
+      const n=c.getChildCount();
+      const s=n<10?26:n<50?32:n<200?40:n<1000?50:60;
+      const txt=n>=1000?(n/1000).toFixed(1).replace('.',',')+'k':n;
+      return L.divIcon({html:'<div class="cl" style="font-size:'+(n<10?11:n<200?12:13)+'px"><span>'+txt+'</span></div>',
+                        className:'clw',iconSize:[s,s]});
+    }
+  }) : L.layerGroup();
+layer.addTo(map);
 const marks={};
 const fmt=n=>Math.round(n).toLocaleString('pt-BR');
 
@@ -251,16 +304,18 @@ function render(zoomOnSingle){
                               : 'nenhum medidor com "'+mq+'" nesta seleção';
   }else{
     st.className='';st.textContent=mq.length?'digite ao menos 3 caracteres':'';
-    const ciS=new Set(checked('fcidade')),setS=new Set(checked('fsetor')),
+    const ciS=MODO_BUSCA?null:new Set(checked('fcidade')),setS=new Set(checked('fsetor')),
           clS=new Set(checked('fclasse')),gdS=new Set(checked('fgd'));
     const minC=+document.getElementById('cons').value;
     const q=norm(document.getElementById('q').value.trim());
     const okc=document.getElementById('okc').checked, okx=document.getElementById('okx').checked;
-    base=DATA.filter(d=>ciS.has(d.ci)&&setS.has(d.st)&&clS.has(d.cl)&&gdS.has(d.gd)
+    base=DATA.filter(d=>(MODO_BUSCA?(!selCid.size||selCid.has(d.ci)):ciS.has(d.ci))
+                        &&setS.has(d.st)&&clS.has(d.cl)&&gdS.has(d.gd)
                         &&d.km>=minC&&(!q||d._t.includes(q))
                         &&(d.ok?okc:okx));
   }
   visiveis=base;
+  const novos=[];
   base.forEach(d=>{
     const gd=d.gd==='Sim';
     const m=L.circleMarker([d.lat,d.lng],{radius:radiusOf(d.km),
@@ -268,14 +323,66 @@ function render(zoomOnSingle){
       dashArray:gd?'3 2':null});
     m.bindPopup(popupOf(d));
     marks[d.i]=m;
-    layer.addLayer(m);
+    novos.push(m);
   });
+  if(CLUSTER) layer.addLayers(novos); else novos.forEach(m=>layer.addLayer(m));
   document.getElementById('count').textContent=base.length+' de '+DATA.length+' UCs visíveis';
   legend();lista();
   if(zoomOnSingle&&mq.length>=3&&base.length){
-    const d=base[0];map.setView([d.lat,d.lng],base.length===1?18:15);
-    if(base.length===1)marks[d.i].openPopup();
+    const d=base[0];
+    if(base.length===1) irPara(d); else map.setView([d.lat,d.lng],13);
   }
+}
+
+function irPara(d){
+  const m=marks[d.i]; if(!m) return;
+  if(CLUSTER && layer.zoomToShowLayer){ layer.zoomToShowLayer(m,()=>m.openPopup()); }
+  else { map.setView([d.lat,d.lng],18); m.openPopup(); }
+}
+
+function sugestoes(){
+  const q=norm(document.getElementById('cidq').value.trim());
+  const box=document.getElementById('cidsug');
+  if(!q){box.innerHTML='';return;}
+  const hits=cidades.filter(c=>norm(c).includes(q)&&!selCid.has(c)).slice(0,10);
+  box.innerHTML = hits.length
+    ? hits.map(c=>'<div class="item sug" data-c="'+c.replace(/"/g,'&quot;')+'">'+c+
+        ' <span class="mini">('+CIDN[c]+' UCs)</span></div>').join('')
+    : '<div class="mini" style="padding:6px 8px">nenhuma cidade com &ldquo;'+q+'&rdquo;</div>';
+  [...box.querySelectorAll('.sug')].forEach(e=>e.addEventListener('click',()=>{
+    selCid.add(e.dataset.c);
+    document.getElementById('cidq').value='';
+    sugestoes(); chips(); render(); zoomCidades();
+  }));
+}
+function chips(){
+  const el=document.getElementById('cidchips');
+  el.innerHTML=[...selCid].sort().map(c=>'<span class="chip" data-c="'+c.replace(/"/g,'&quot;')+'">'+c+' &times;</span>').join('')
+    +(selCid.size?'<span class="chip lim" id="limpaCid">limpar</span>':'');
+  [...el.querySelectorAll('.chip[data-c]')].forEach(e=>e.addEventListener('click',()=>{
+    selCid.delete(e.dataset.c); chips(); render(); if(selCid.size) zoomCidades(); else map.fitBounds(BOUNDS);
+  }));
+  const l=document.getElementById('limpaCid');
+  if(l) l.addEventListener('click',()=>{selCid.clear();chips();render();map.fitBounds(BOUNDS);});
+  document.getElementById('cidst').textContent = selCid.size
+    ? selCid.size+' cidade(s) selecionada(s)'
+    : 'nenhuma selecionada \u2014 mostrando as '+cidades.length+' cidades do estado';
+  [...document.querySelectorAll('#topBox .topc')].forEach(e=>e.classList.toggle('on',selCid.has(e.dataset.c)));
+}
+function zoomCidades(){
+  const pts=DATA.filter(d=>selCid.has(d.ci)).map(d=>[d.lat,d.lng]);
+  if(pts.length) map.fitBounds(L.latLngBounds(pts).pad(0.15));
+}
+function montaTop(){
+  const top=cidades.slice().sort((a,b)=>CIDN[b]-CIDN[a]).slice(0,20);
+  document.getElementById('topBox').innerHTML=top.map((c,i)=>
+    '<div class="item topc" data-c="'+c.replace(/"/g,'&quot;')+'"><b>'+(i+1)+'.</b> '+c+
+    ' <span class="mini">('+CIDN[c]+' UCs)</span></div>').join('');
+  [...document.querySelectorAll('#topBox .topc')].forEach(e=>e.addEventListener('click',()=>{
+    const c=e.dataset.c;
+    if(selCid.has(c)){selCid.delete(c);} else {selCid.add(c);}
+    chips(); render(); if(selCid.size) zoomCidades(); else map.fitBounds(BOUNDS);
+  }));
 }
 
 function lista(){
@@ -288,7 +395,7 @@ function lista(){
     (d.md?' · med '+d.md.split(' / ')[0]:'')+'</span></div>').join('');
   [...el.querySelectorAll('.item')].forEach(it=>it.addEventListener('click',()=>{
     const d=visiveis.find(x=>x.i==it.dataset.i);
-    map.setView([d.lat,d.lng],18);marks[d.i].openPopup();
+    irPara(d);
     if(window.matchMedia('(max-width:720px)').matches)setMobileFilters(false);
   }));
 }
@@ -330,9 +437,18 @@ function setMobileFilters(open){
 mobileFilters.addEventListener('click',()=>setMobileFilters(mobileFilters.getAttribute('aria-expanded')!=='true'));
 map.on('click',()=>{if(window.matchMedia('(max-width:720px)').matches)setMobileFilters(false);});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')setMobileFilters(false);});
+const BOUNDS=L.latLngBounds(DATA.map(d=>[d.lat,d.lng])).pad(0.05);
+if(MODO_BUSCA){
+  document.getElementById('cidq').addEventListener('input',sugestoes);
+  document.getElementById('topHd').addEventListener('click',()=>{
+    const b=document.getElementById('topBox'); b.hidden=!b.hidden;
+    document.getElementById('topSeta').textContent=b.hidden?'\u25b8':'\u25be';
+  });
+  montaTop(); chips();
+}
 document.getElementById('consval').textContent=(__MINCONS__).toLocaleString('pt-BR');
 render();
-map.fitBounds(L.latLngBounds(DATA.map(d=>[d.lat,d.lng])).pad(0.05));
+map.fitBounds(BOUNDS);
 </script>
 </body>
 </html>

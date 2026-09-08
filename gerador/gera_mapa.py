@@ -7,7 +7,7 @@ Uso (rodar de dentro de Documents\bdgd\mapas):
 
 Le apenas os .parquet em <UF>\out\ (UCBT_tab, PONNOT, EQME, UGBT_tab).
 """
-import argparse, json, os, re, struct, sys, unicodedata
+import argparse, csv, json, os, re, struct, sys, unicodedata
 import duckdb, pandas as pd
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -16,6 +16,20 @@ import cnae_map
 AQUI = os.path.dirname(os.path.abspath(__file__))
 RAIZ = os.path.dirname(AQUI)                       # ...\mapas-bdgd
 BASE_PADRAO = os.environ.get("BDGD_BASE", r"C:\Users\VictorFranco\Documents\bdgd")
+
+UF_COD = {"RO":"11","AC":"12","AM":"13","RR":"14","PA":"15","AP":"16","TO":"17",
+          "MA":"21","PI":"22","CE":"23","RN":"24","PB":"25","PE":"26","AL":"27","SE":"28",
+          "BA":"29","MG":"31","ES":"32","RJ":"33","SP":"35","PR":"41","SC":"42","RS":"43",
+          "MS":"50","MT":"51","GO":"52","DF":"53"}
+
+def municipios_da_uf(uf):
+    """Nome de cada municipio da UF, do cadastro IBGE em gerador/municipios.csv."""
+    arq = os.path.join(AQUI, "municipios.csv")
+    if not os.path.exists(arq):
+        sys.exit("municipios.csv nao encontrado em " + AQUI + " — necessario para --estado")
+    cod = UF_COD[uf.upper()]
+    with open(arq, encoding="utf-8") as f:
+        return {r["codigo_ibge"]: r["nome"] for r in csv.DictReader(f) if r["codigo_uf"] == cod}
 
 CLASSE = {"RE": "Residencial", "CO": "Comercial", "IN": "Industrial", "RU": "Rural",
           "PP": "Poder Público", "IP": "Iluminação Pública", "SP": "Serviço Público",
@@ -60,8 +74,10 @@ def jitter(cod, i):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--uf", required=True)
-    ap.add_argument("--cidade", action="append", required=True,
+    ap.add_argument("--cidade", action="append", default=[],
                     help='CODIGO_IBGE=Nome (pode repetir)')
+    ap.add_argument("--estado", action="store_true",
+                    help="todas as cidades da UF (nomes vindos de municipios.csv)")
     ap.add_argument("--titulo", required=True)
     ap.add_argument("--slug", required=True)
     ap.add_argument("--min", type=float, default=5000.0)
@@ -73,11 +89,18 @@ def main():
                     help="nao excluir poder publico / IP / saneamento / consumo proprio")
     a = ap.parse_args()
 
-    muns, nomes = [], {}
-    for c in a.cidade:
-        cod, _, nome = c.partition("=")
-        muns.append(cod.strip())
-        nomes[cod.strip()] = (nome.strip() or cod.strip())
+    if a.estado:
+        nomes = municipios_da_uf(a.uf)
+        muns = list(nomes)
+        print(f"[0/7] modo estado: {len(muns)} municipios de {a.uf.upper()} no cadastro IBGE")
+    else:
+        if not a.cidade:
+            sys.exit("informe --cidade CODIGO=Nome (pode repetir) ou --estado")
+        muns, nomes = [], {}
+        for c in a.cidade:
+            cod, _, nome = c.partition("=")
+            muns.append(cod.strip())
+            nomes[cod.strip()] = (nome.strip() or cod.strip())
 
     BASE = a.base
     out = os.path.join(BASE, a.uf, "out")
@@ -176,14 +199,21 @@ def main():
     df["LON_MAPA"] = df["LON"] + [d[1] for d in dl]
 
     # distancia ao centro da propria cidade -> sinaliza coordenada suspeita (ressalva 7 do guia)
+    # O limite nao pode ser fixo: municipio de MT ou do PA e maior que estado do Sudeste,
+    # entao UC rural legitima fica a 60 km da sede. Usamos a propria dispersao da cidade:
+    # suspeito e o que passa de 3x o p90 dela, com piso de 40 km.
     import math
     df["DIST_CENTRO_KM"] = 0.0
+    df["_LIM"] = 40.0
     for mun, g in df.groupby("MUN"):
         la0, lo0 = g["LAT"].median(), g["LON"].median()
-        df.loc[g.index, "DIST_CENTRO_KM"] = [
-            round(math.hypot((la - la0) * 111.0, (lo - lo0) * 111.0 * math.cos(math.radians(la0))), 1)
-            for la, lo in zip(g["LAT"], g["LON"])]
-    df["COORD_OK"] = (df["DIST_CENTRO_KM"] <= 40) & (df["CEP"].astype(str) != "78000-000")
+        d = [round(math.hypot((la - la0) * 111.0, (lo - lo0) * 111.0 * math.cos(math.radians(la0))), 1)
+             for la, lo in zip(g["LAT"], g["LON"])]
+        df.loc[g.index, "DIST_CENTRO_KM"] = d
+        p90 = pd.Series(d).quantile(0.90) if len(d) >= 5 else max(d + [0.0])
+        df.loc[g.index, "_LIM"] = round(max(40.0, 3.0 * float(p90)), 1)
+    df["COORD_OK"] = df["DIST_CENTRO_KM"] <= df["_LIM"]
+    print(f"      coordenada a conferir: {int((~df['COORD_OK']).sum())} de {len(df)}")
 
     df["Link_Maps"] = ("https://www.google.com/maps?q=" +
                        df["LAT"].astype(str) + "," + df["LON"].astype(str))
@@ -198,7 +228,8 @@ def main():
             ("CAR_INST", "Carga instalada (kW)"), ("DAT_CON", "Ligação em"),
             ("Tem_GD", "Tem GD"), ("POT_GD", "Potência GD (kW)"), ("ARE_LOC", "Área"),
             ("UC_NO_POSTE", "UCs no mesmo poste"),
-            ("DIST_CENTRO_KM", "Dist. do centro (km)"), ("COORD_OK", "Coordenada confiável"),
+            ("DIST_CENTRO_KM", "Dist. do centro (km)"), ("_LIM", "Limite da cidade (km)"),
+            ("COORD_OK", "Coordenada confiável"),
             ("LAT", "Latitude"), ("LON", "Longitude"),
             ("Link_Maps", "Google Maps"), ("COD_ID", "COD_ID da UC"), ("PN_CON", "Poste (PN_CON)")]
     x = df[[c[0] for c in cols]].copy()
@@ -223,7 +254,7 @@ def main():
         larg = {"Rank": 6, "Cidade": 15, "Consumo médio (kWh/mês)": 14, "Consumo ano (kWh)": 14,
                 "Classe": 12, "Setor": 24, "CNAE": 11, "Descrição CNAE": 40, "Bairro": 24,
                 "CEP": 11, "Medidor(es)": 16,
-                "Dist. do centro (km)": 10, "Coordenada confiável": 10, "Medidor instalado em": 12, "Grupo tarifário": 9,
+                "Dist. do centro (km)": 10, "Limite da cidade (km)": 10, "Coordenada confiável": 10, "Medidor instalado em": 12, "Grupo tarifário": 9,
                 "Tensão (V)": 9, "Carga instalada (kW)": 11, "Ligação em": 11, "Tem GD": 7,
                 "Potência GD (kW)": 11, "Área": 7, "UCs no mesmo poste": 10, "Latitude": 12,
                 "Longitude": 12, "Google Maps": 34, "COD_ID da UC": 34, "Poste (PN_CON)": 34}
@@ -283,6 +314,10 @@ def main():
     teto = int(max(40000, min(df["KWH_MES"].max(), 200000)))
     teto = int(round(teto / 5000.0) * 5000)
 
+    vend = os.path.join(AQUI, "vendor")
+    mc_js = open(os.path.join(vend, "markercluster.js"), encoding="utf-8").read()
+    mc_css = open(os.path.join(vend, "markercluster.css"), encoding="utf-8").read()
+
     tpl = open(os.path.join(AQUI, "template_mapa.html"), encoding="utf-8").read()
     html = (tpl.replace("__TITULO__", a.titulo)
                .replace("__MINCONS__", str(int(a.min)))
@@ -291,13 +326,20 @@ def main():
                .replace("__NOTA_MT_CURTA__", nota_curta)
                .replace("__NOTA_MT__", nota_mt)
                .replace("__NUCS__", str(len(dados)))
+               .replace("__MC_CSS__", mc_css)
+               .replace("__MC_JS__", mc_js)
                .replace("__DATA__", json.dumps(dados, ensure_ascii=False, separators=(",", ":"))))
     hf = os.path.join(a.docs, f"{a.slug}.html")
     open(hf, "w", encoding="utf-8").write(html)
     print("      " + hf)
     print("\nResumo por cidade:")
-    print(df.groupby("Cidade").agg(UCs=("Rank", "count"),
-                                   kWh_mes_total=("KWH_MES", "sum")).round(0).to_string())
+    resumo = df.groupby("Cidade").agg(UCs=("Rank", "count"),
+                                      kWh_mes_total=("KWH_MES", "sum")).round(0)
+    if a.estado:
+        print(f"  {len(resumo)} cidades com UCs no recorte — as 15 maiores:")
+        print(resumo.sort_values("UCs", ascending=False).head(15).to_string())
+    else:
+        print(resumo.to_string())
 
     # manifesto do site (docs/cidades.json) -> alimenta o index.html
     import datetime, json as _json
@@ -307,7 +349,9 @@ def main():
         reg = {c["slug"]: c for c in _json.load(open(man, encoding="utf-8"))}
     reg[a.slug] = {
         "slug": a.slug, "titulo": a.titulo, "uf": a.uf,
-        "cidades": [nomes[m] for m in muns], "min": int(a.min),
+        "cidades": ([f"{len(df['Cidade'].unique())} cidades"] if a.estado
+                    else [nomes[m] for m in muns]),
+        "estado": bool(a.estado), "min": int(a.min),
         "ucs": int(len(df)),
         "excluidas_mt": int(excluidas),
         "kwh_mes": int(df["KWH_MES"].sum()),

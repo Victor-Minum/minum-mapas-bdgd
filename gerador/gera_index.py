@@ -8,16 +8,27 @@ DOCS = os.path.join(os.path.dirname(AQUI), "docs")
 cid = json.load(open(os.path.join(DOCS, "cidades.json"), encoding="utf-8"))
 br = lambda n: f"{n:,}".replace(",", ".")
 
-cards = "\n".join(f'''
+def card(c):
+    return f'''
       <a class="card" href="{c['slug']}.html">
         <h3>{c['titulo']}</h3>
         <div class="big">{br(c['ucs'])}<span> UCs no funil</span></div>
         <div class="kv"><span>Consumo somado</span><b>{br(round(c['kwh_mes']/1000))} MWh/mês</b></div>
         <div class="kv"><span>Corte aplicado</span><b>≥ {br(c['min'])} kWh/mês</b></div>
+        <div class="kv"><span>Cidades com UCs</span><b>{c['cidades'][0] if c.get('estado') else len(c['cidades'])}</b></div>
         <div class="kv"><span>Já tinham GD</span><b>{br(c['com_gd'])}</b></div>
         <div class="ft">Safra {c['safra']} · atualizado em {datetime.date.fromisoformat(c['atualizado']).strftime('%d/%m/%Y')}
           &nbsp;·&nbsp; <span class="xls" data-x="{c['planilha']}">planilha .xlsx</span></div>
-      </a>''' for c in cid)
+      </a>'''
+
+est = [c for c in cid if c.get("estado")]
+rec = [c for c in cid if not c.get("estado")]
+blocos = ""
+if est:
+    blocos += '<h2 class="grupo">Estados inteiros</h2><div class="grid">' + "\n".join(card(c) for c in est) + '</div>'
+if rec:
+    blocos += '<h2 class="grupo">Recortes por cidade</h2><div class="grid">' + "\n".join(card(c) for c in rec) + '</div>'
+cards = blocos
 
 tot_ucs = sum(c["ucs"] for c in cid)
 tot_kwh = sum(c["kwh_mes"] for c in cid)
@@ -40,6 +51,9 @@ html = f'''<!DOCTYPE html>
          border:1px solid var(--line);border-radius:12px;margin-bottom:32px}}
   .stats div{{font-size:13px;color:var(--mut)}}
   .stats b{{display:block;font-size:22px;color:var(--ink);font-weight:650}}
+  .grupo{{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);
+         margin:34px 0 14px;font-weight:600}}
+  .grupo:first-of-type{{margin-top:0}}
   .grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}}
   .card{{display:block;background:var(--panel);border:1px solid var(--line);border-radius:12px;
         padding:18px 20px;text-decoration:none;color:inherit;transition:border-color .15s,transform .15s}}
@@ -64,12 +78,11 @@ html = f'''<!DOCTYPE html>
      Base de Dados Geográfica da Distribuidora. Cada mapa permite filtrar por setor, classe, consumo e
      geração distribuída, e localizar uma UC pelo <b>código do medidor</b> que aparece na fatura.</p>
   <div class="stats">
-    <div>Cidades publicadas<b>{len(cid)}</b></div>
+    <div>Recortes publicados<b>{len(cid)}</b></div>
     <div>UCs no funil<b>{br(tot_ucs)}</b></div>
     <div>Consumo mapeado<b>{br(round(tot_kwh/1000))} MWh/mês</b></div>
   </div>
-  <div class="grid">{cards}
-  </div>
+  {cards}
   <div class="nota">
     <b>Sobre os dados.</b> Fonte: BDGD/ANEEL, safra 31/12/2024 — dado público, sem CNPJ, nome ou
     titular. A coordenada é a do <b>poste de conexão</b>, não da fachada: prova proximidade, não

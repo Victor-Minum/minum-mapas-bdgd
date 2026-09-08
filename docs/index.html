@@ -16,6 +16,9 @@
          border:1px solid var(--line);border-radius:12px;margin-bottom:32px}
   .stats div{font-size:13px;color:var(--mut)}
   .stats b{display:block;font-size:22px;color:var(--ink);font-weight:650}
+  .grupo{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);
+         margin:34px 0 14px;font-weight:600}
+  .grupo:first-of-type{margin-top:0}
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
   .card{display:block;background:var(--panel);border:1px solid var(--line);border-radius:12px;
         padding:18px 20px;text-decoration:none;color:inherit;transition:border-color .15s,transform .15s}
@@ -40,18 +43,84 @@
      Base de Dados Geográfica da Distribuidora. Cada mapa permite filtrar por setor, classe, consumo e
      geração distribuída, e localizar uma UC pelo <b>código do medidor</b> que aparece na fatura.</p>
   <div class="stats">
-    <div>Cidades publicadas<b>2</b></div>
-    <div>UCs no funil<b>1.473</b></div>
-    <div>Consumo mapeado<b>12.318 MWh/mês</b></div>
+    <div>Recortes publicados<b>8</b></div>
+    <div>UCs no funil<b>25.322</b></div>
+    <div>Consumo mapeado<b>218.906 MWh/mês</b></div>
   </div>
-  <div class="grid">
+  <h2 class="grupo">Estados inteiros</h2><div class="grid">
+      <a class="card" href="ceara.html">
+        <h3>Ceará — estado inteiro</h3>
+        <div class="big">2.576<span> UCs no funil</span></div>
+        <div class="kv"><span>Consumo somado</span><b>25.288 MWh/mês</b></div>
+        <div class="kv"><span>Corte aplicado</span><b>≥ 5.000 kWh/mês</b></div>
+        <div class="kv"><span>Cidades com UCs</span><b>150 cidades</b></div>
+        <div class="kv"><span>Já tinham GD</span><b>322</b></div>
+        <div class="ft">Safra 2024-12-31 · atualizado em 08/09/2026
+          &nbsp;·&nbsp; <span class="xls" data-x="planilhas/UCs_ceara.xlsx">planilha .xlsx</span></div>
+      </a>
+
+      <a class="card" href="goias.html">
+        <h3>Goiás — estado inteiro</h3>
+        <div class="big">8.086<span> UCs no funil</span></div>
+        <div class="kv"><span>Consumo somado</span><b>73.331 MWh/mês</b></div>
+        <div class="kv"><span>Corte aplicado</span><b>≥ 5.000 kWh/mês</b></div>
+        <div class="kv"><span>Cidades com UCs</span><b>216 cidades</b></div>
+        <div class="kv"><span>Já tinham GD</span><b>2.132</b></div>
+        <div class="ft">Safra 2024-12-31 · atualizado em 08/09/2026
+          &nbsp;·&nbsp; <span class="xls" data-x="planilhas/UCs_goias.xlsx">planilha .xlsx</span></div>
+      </a>
+
+      <a class="card" href="maranhao.html">
+        <h3>Maranhão — estado inteiro</h3>
+        <div class="big">2.264<span> UCs no funil</span></div>
+        <div class="kv"><span>Consumo somado</span><b>17.736 MWh/mês</b></div>
+        <div class="kv"><span>Corte aplicado</span><b>≥ 5.000 kWh/mês</b></div>
+        <div class="kv"><span>Cidades com UCs</span><b>142 cidades</b></div>
+        <div class="kv"><span>Já tinham GD</span><b>246</b></div>
+        <div class="ft">Safra 2024-12-31 · atualizado em 08/09/2026
+          &nbsp;·&nbsp; <span class="xls" data-x="planilhas/UCs_maranhao.xlsx">planilha .xlsx</span></div>
+      </a>
+
+      <a class="card" href="mato-grosso-do-sul.html">
+        <h3>Mato Grosso do Sul — estado inteiro</h3>
+        <div class="big">2.854<span> UCs no funil</span></div>
+        <div class="kv"><span>Consumo somado</span><b>23.748 MWh/mês</b></div>
+        <div class="kv"><span>Corte aplicado</span><b>≥ 5.000 kWh/mês</b></div>
+        <div class="kv"><span>Cidades com UCs</span><b>73 cidades</b></div>
+        <div class="kv"><span>Já tinham GD</span><b>805</b></div>
+        <div class="ft">Safra 2024-12-31 · atualizado em 08/09/2026
+          &nbsp;·&nbsp; <span class="xls" data-x="planilhas/UCs_mato-grosso-do-sul.xlsx">planilha .xlsx</span></div>
+      </a>
+
+      <a class="card" href="mato-grosso.html">
+        <h3>Mato Grosso — estado inteiro</h3>
+        <div class="big">5.045<span> UCs no funil</span></div>
+        <div class="kv"><span>Consumo somado</span><b>42.455 MWh/mês</b></div>
+        <div class="kv"><span>Corte aplicado</span><b>≥ 5.000 kWh/mês</b></div>
+        <div class="kv"><span>Cidades com UCs</span><b>134 cidades</b></div>
+        <div class="kv"><span>Já tinham GD</span><b>1.146</b></div>
+        <div class="ft">Safra 2024-12-31 · atualizado em 08/09/2026
+          &nbsp;·&nbsp; <span class="xls" data-x="planilhas/UCs_mato-grosso.xlsx">planilha .xlsx</span></div>
+      </a>
+
+      <a class="card" href="para.html">
+        <h3>Pará — estado inteiro</h3>
+        <div class="big">3.024<span> UCs no funil</span></div>
+        <div class="kv"><span>Consumo somado</span><b>24.031 MWh/mês</b></div>
+        <div class="kv"><span>Corte aplicado</span><b>≥ 5.000 kWh/mês</b></div>
+        <div class="kv"><span>Cidades com UCs</span><b>124 cidades</b></div>
+        <div class="kv"><span>Já tinham GD</span><b>373</b></div>
+        <div class="ft">Safra 2024-12-31 · atualizado em 08/09/2026
+          &nbsp;·&nbsp; <span class="xls" data-x="planilhas/UCs_para.xlsx">planilha .xlsx</span></div>
+      </a></div><h2 class="grupo">Recortes por cidade</h2><div class="grid">
       <a class="card" href="cuiaba-varzea-grande.html">
         <h3>Cuiabá + Várzea Grande — MT</h3>
         <div class="big">1.122<span> UCs no funil</span></div>
         <div class="kv"><span>Consumo somado</span><b>9.402 MWh/mês</b></div>
         <div class="kv"><span>Corte aplicado</span><b>≥ 5.000 kWh/mês</b></div>
+        <div class="kv"><span>Cidades com UCs</span><b>2</b></div>
         <div class="kv"><span>Já tinham GD</span><b>196</b></div>
-        <div class="ft">Safra 2024-12-31 · atualizado em 31/08/2026
+        <div class="ft">Safra 2024-12-31 · atualizado em 08/09/2026
           &nbsp;·&nbsp; <span class="xls" data-x="planilhas/UCs_cuiaba-varzea-grande.xlsx">planilha .xlsx</span></div>
       </a>
 
@@ -60,11 +129,11 @@
         <div class="big">351<span> UCs no funil</span></div>
         <div class="kv"><span>Consumo somado</span><b>2.916 MWh/mês</b></div>
         <div class="kv"><span>Corte aplicado</span><b>≥ 5.000 kWh/mês</b></div>
+        <div class="kv"><span>Cidades com UCs</span><b>4</b></div>
         <div class="kv"><span>Já tinham GD</span><b>45</b></div>
-        <div class="ft">Safra 2024-12-31 · atualizado em 03/09/2026
+        <div class="ft">Safra 2024-12-31 · atualizado em 08/09/2026
           &nbsp;·&nbsp; <span class="xls" data-x="planilhas/UCs_imperatriz-e-regiao.xlsx">planilha .xlsx</span></div>
-      </a>
-  </div>
+      </a></div>
   <div class="nota">
     <b>Sobre os dados.</b> Fonte: BDGD/ANEEL, safra 31/12/2024 — dado público, sem CNPJ, nome ou
     titular. A coordenada é a do <b>poste de conexão</b>, não da fachada: prova proximidade, não
