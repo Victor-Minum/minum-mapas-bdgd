@@ -315,9 +315,10 @@ function checked(id){return [...document.querySelectorAll('#'+id+' input:checked
 
 let layer = CLUSTER ? L.markerClusterGroup({
     chunkedLoading:true, showCoverageOnHover:false, spiderfyOnMaxZoom:true,
-    disableClusteringAtZoom:15,
-    // longe agrupa muito, perto vai soltando
-    maxClusterRadius:function(z){ return z<8?110 : z<10?85 : z<12?60 : 45; },
+    // Medido no pior caso (Goiânia, 2.263 UCs): soltando em z11 sao ~4.600 pontos
+    // desenhados a 50 fps. Entao a partir do zoom de cidade nao ha mais agrupamento.
+    disableClusteringAtZoom:11,
+    maxClusterRadius:function(z){ return z<8?110 : z<10?85 : 65; },
     iconCreateFunction:function(c){
       const n=c.getChildCount();
       const s=n<10?26:n<50?32:n<200?40:n<1000?50:60;
