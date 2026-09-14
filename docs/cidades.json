@@ -17,6 +17,23 @@
   "safra": "2024-12-31"
  },
  {
+  "slug": "ceara-2025",
+  "titulo": "Ceará — estado inteiro",
+  "uf": "CE",
+  "cidades": [
+   "165 cidades"
+  ],
+  "estado": true,
+  "min": 5000,
+  "ucs": 4650,
+  "excluidas_mt": 58,
+  "kwh_mes": 39986219,
+  "com_gd": 1191,
+  "planilha": "planilhas/UCs_ceara-2025.xlsx",
+  "atualizado": "2026-09-14",
+  "safra": "2025-12-31"
+ },
+ {
   "slug": "cuiaba-varzea-grande",
   "titulo": "Cuiabá + Várzea Grande — MT",
   "uf": "MT",
@@ -50,6 +67,23 @@
   "planilha": "planilhas/UCs_goias.xlsx",
   "atualizado": "2026-09-08",
   "safra": "2024-12-31"
+ },
+ {
+  "slug": "goias-2025",
+  "titulo": "Goiás — estado inteiro",
+  "uf": "GO",
+  "cidades": [
+   "221 cidades"
+  ],
+  "estado": true,
+  "min": 5000,
+  "ucs": 9483,
+  "excluidas_mt": 1,
+  "kwh_mes": 89365300,
+  "com_gd": 2485,
+  "planilha": "planilhas/UCs_goias-2025.xlsx",
+  "atualizado": "2026-09-14",
+  "safra": "2025-12-31"
  },
  {
   "slug": "imperatriz-e-regiao",
@@ -89,6 +123,23 @@
   "safra": "2024-12-31"
  },
  {
+  "slug": "maranhao-2025",
+  "titulo": "Maranhão — estado inteiro",
+  "uf": "MA",
+  "cidades": [
+   "153 cidades"
+  ],
+  "estado": true,
+  "min": 5000,
+  "ucs": 2890,
+  "excluidas_mt": 0,
+  "kwh_mes": 23852365,
+  "com_gd": 825,
+  "planilha": "planilhas/UCs_maranhao-2025.xlsx",
+  "atualizado": "2026-09-14",
+  "safra": "2025-12-31"
+ },
+ {
   "slug": "mato-grosso-do-sul",
   "titulo": "Mato Grosso do Sul — estado inteiro",
   "uf": "MS",
@@ -104,6 +155,23 @@
   "planilha": "planilhas/UCs_mato-grosso-do-sul.xlsx",
   "atualizado": "2026-09-08",
   "safra": "2024-12-31"
+ },
+ {
+  "slug": "mato-grosso-do-sul-2025",
+  "titulo": "Mato Grosso do Sul — estado inteiro",
+  "uf": "MS",
+  "cidades": [
+   "73 cidades"
+  ],
+  "estado": true,
+  "min": 5000,
+  "ucs": 2504,
+  "excluidas_mt": 18,
+  "kwh_mes": 20572497,
+  "com_gd": 733,
+  "planilha": "planilhas/UCs_mato-grosso-do-sul-2025.xlsx",
+  "atualizado": "2026-09-14",
+  "safra": "2025-12-31"
  },
  {
   "slug": "mato-grosso",
@@ -123,6 +191,23 @@
   "safra": "2024-12-31"
  },
  {
+  "slug": "mato-grosso-2025",
+  "titulo": "Mato Grosso — estado inteiro",
+  "uf": "MT",
+  "cidades": [
+   "136 cidades"
+  ],
+  "estado": true,
+  "min": 5000,
+  "ucs": 5129,
+  "excluidas_mt": 36,
+  "kwh_mes": 43132989,
+  "com_gd": 1241,
+  "planilha": "planilhas/UCs_mato-grosso-2025.xlsx",
+  "atualizado": "2026-09-14",
+  "safra": "2025-12-31"
+ },
+ {
   "slug": "para",
   "titulo": "Pará — estado inteiro",
   "uf": "PA",
@@ -138,5 +223,22 @@
   "planilha": "planilhas/UCs_para.xlsx",
   "atualizado": "2026-09-08",
   "safra": "2024-12-31"
+ },
+ {
+  "slug": "para-2025",
+  "titulo": "Pará — estado inteiro",
+  "uf": "PA",
+  "cidades": [
+   "134 cidades"
+  ],
+  "estado": true,
+  "min": 5000,
+  "ucs": 4531,
+  "excluidas_mt": 0,
+  "kwh_mes": 38916771,
+  "com_gd": 770,
+  "planilha": "planilhas/UCs_para-2025.xlsx",
+  "atualizado": "2026-09-14",
+  "safra": "2025-12-31"
  }
 ]
