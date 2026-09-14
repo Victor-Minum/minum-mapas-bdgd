@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Mapas de consumo BDGD — Minum</title>
 <style>
-  :root{--bg:#0f1720;--panel:#161f2b;--ink:#e8eef5;--mut:#9fb0c3;--line:#2a3644;--acc:#4da3ff}
+  :root{--bg:#0f1720;--panel:#161f2b;--ink:#e8eef5;--mut:#9fb0c3;--line:#2a3644;--acc:#4da3ff;
+        --up:#4ade80;--down:#fb7185}
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);
        font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.55}
@@ -16,14 +17,27 @@
          border:1px solid var(--line);border-radius:12px;margin-bottom:32px}
   .stats div{font-size:13px;color:var(--mut)}
   .stats b{display:block;font-size:22px;color:var(--ink);font-weight:650}
-  .grupo{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);
-         margin:34px 0 14px;font-weight:600}
-  .grupo:first-of-type{margin-top:0}
+  .safra{margin:0 0 44px}
+  .safra.hist{opacity:.72}
+  .safra.hist:hover{opacity:1}
+  .cab{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:17px;margin:0 0 4px;
+       padding-bottom:10px;border-bottom:1px solid var(--line)}
+  .tag{font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--bg);
+       background:var(--acc);padding:2px 8px;border-radius:20px;font-weight:700}
+  .safra.hist .tag{background:var(--line);color:var(--mut)}
+  .meta{margin-left:auto;font-size:12.5px;color:var(--mut);font-weight:400}
+  .aviso{font-size:12.5px;color:var(--mut);margin:10px 0 0}
+  .grupo{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);
+         margin:22px 0 12px;font-weight:600}
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
   .card{display:block;background:var(--panel);border:1px solid var(--line);border-radius:12px;
         padding:18px 20px;text-decoration:none;color:inherit;transition:border-color .15s,transform .15s}
   .card:hover{border-color:var(--acc);transform:translateY(-2px)}
-  .card h3{margin:0 0 10px;font-size:16px}
+  .card h3{margin:0 0 10px;font-size:16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .chip{font-size:11px;font-weight:700;padding:2px 7px;border-radius:20px;
+        background:var(--line);color:var(--mut);white-space:nowrap}
+  .chip.up{background:rgba(74,222,128,.15);color:var(--up)}
+  .chip.down{background:rgba(251,113,133,.15);color:var(--down)}
   .big{font-size:30px;font-weight:700;color:var(--acc);margin-bottom:12px}
   .big span{font-size:13px;font-weight:400;color:var(--mut)}
   .kv{display:flex;justify-content:space-between;font-size:13px;color:var(--mut);padding:2px 0}
@@ -33,7 +47,9 @@
   .nota{margin-top:36px;padding:16px 20px;border:1px solid var(--line);border-radius:12px;
         font-size:13px;color:var(--mut)}
   .nota b{color:var(--ink)}
+  .nota + .nota{margin-top:14px}
   code{background:#0b121a;padding:1px 5px;border-radius:4px;font-size:12px}
+  @media (max-width:520px){.wrap{padding:28px 16px 60px} .meta{margin-left:0;width:100%}}
 </style>
 </head>
 <body>
@@ -43,102 +59,119 @@
      Base de Dados Geográfica da Distribuidora. Cada mapa permite filtrar por setor, classe, consumo e
      geração distribuída, e localizar uma UC pelo <b>código do medidor</b> que aparece na fatura.</p>
   <div class="stats">
-    <div>Recortes publicados<b>8</b></div>
+    <div>Recortes na safra atual<b>8</b></div>
     <div>UCs no funil<b>25.322</b></div>
     <div>Consumo mapeado<b>218.906 MWh/mês</b></div>
+    
   </div>
-  <h2 class="grupo">Estados inteiros</h2><div class="grid">
+  <section class="safra"><h2 class="cab">Safra 2024-12-31<span class="tag">safra atual</span><span class="meta">8 recortes · 25.322 UCs</span></h2><h3 class="grupo">Estados inteiros</h3><div class="grid">
       <a class="card" href="ceara.html">
-        <h3>Ceará — estado inteiro</h3>
+        <h3>Ceará — estado inteiro </h3>
         <div class="big">2.576<span> UCs no funil</span></div>
         <div class="kv"><span>Consumo somado</span><b>25.288 MWh/mês</b></div>
         <div class="kv"><span>Corte aplicado</span><b>≥ 5.000 kWh/mês</b></div>
         <div class="kv"><span>Cidades com UCs</span><b>150 cidades</b></div>
         <div class="kv"><span>Já tinham GD</span><b>322</b></div>
+        
         <div class="ft">Safra 2024-12-31 · atualizado em 08/09/2026
           &nbsp;·&nbsp; <span class="xls" data-x="planilhas/UCs_ceara.xlsx">planilha .xlsx</span></div>
       </a>
 
       <a class="card" href="goias.html">
-        <h3>Goiás — estado inteiro</h3>
+        <h3>Goiás — estado inteiro </h3>
         <div class="big">8.086<span> UCs no funil</span></div>
         <div class="kv"><span>Consumo somado</span><b>73.331 MWh/mês</b></div>
         <div class="kv"><span>Corte aplicado</span><b>≥ 5.000 kWh/mês</b></div>
         <div class="kv"><span>Cidades com UCs</span><b>216 cidades</b></div>
         <div class="kv"><span>Já tinham GD</span><b>2.132</b></div>
+        
         <div class="ft">Safra 2024-12-31 · atualizado em 08/09/2026
           &nbsp;·&nbsp; <span class="xls" data-x="planilhas/UCs_goias.xlsx">planilha .xlsx</span></div>
       </a>
 
       <a class="card" href="maranhao.html">
-        <h3>Maranhão — estado inteiro</h3>
+        <h3>Maranhão — estado inteiro </h3>
         <div class="big">2.264<span> UCs no funil</span></div>
         <div class="kv"><span>Consumo somado</span><b>17.736 MWh/mês</b></div>
         <div class="kv"><span>Corte aplicado</span><b>≥ 5.000 kWh/mês</b></div>
         <div class="kv"><span>Cidades com UCs</span><b>142 cidades</b></div>
         <div class="kv"><span>Já tinham GD</span><b>246</b></div>
+        
         <div class="ft">Safra 2024-12-31 · atualizado em 08/09/2026
           &nbsp;·&nbsp; <span class="xls" data-x="planilhas/UCs_maranhao.xlsx">planilha .xlsx</span></div>
       </a>
 
       <a class="card" href="mato-grosso-do-sul.html">
-        <h3>Mato Grosso do Sul — estado inteiro</h3>
+        <h3>Mato Grosso do Sul — estado inteiro </h3>
         <div class="big">2.854<span> UCs no funil</span></div>
         <div class="kv"><span>Consumo somado</span><b>23.748 MWh/mês</b></div>
         <div class="kv"><span>Corte aplicado</span><b>≥ 5.000 kWh/mês</b></div>
         <div class="kv"><span>Cidades com UCs</span><b>73 cidades</b></div>
         <div class="kv"><span>Já tinham GD</span><b>805</b></div>
+        
         <div class="ft">Safra 2024-12-31 · atualizado em 08/09/2026
           &nbsp;·&nbsp; <span class="xls" data-x="planilhas/UCs_mato-grosso-do-sul.xlsx">planilha .xlsx</span></div>
       </a>
 
       <a class="card" href="mato-grosso.html">
-        <h3>Mato Grosso — estado inteiro</h3>
+        <h3>Mato Grosso — estado inteiro </h3>
         <div class="big">5.045<span> UCs no funil</span></div>
         <div class="kv"><span>Consumo somado</span><b>42.455 MWh/mês</b></div>
         <div class="kv"><span>Corte aplicado</span><b>≥ 5.000 kWh/mês</b></div>
         <div class="kv"><span>Cidades com UCs</span><b>134 cidades</b></div>
         <div class="kv"><span>Já tinham GD</span><b>1.146</b></div>
+        
         <div class="ft">Safra 2024-12-31 · atualizado em 08/09/2026
           &nbsp;·&nbsp; <span class="xls" data-x="planilhas/UCs_mato-grosso.xlsx">planilha .xlsx</span></div>
       </a>
 
       <a class="card" href="para.html">
-        <h3>Pará — estado inteiro</h3>
+        <h3>Pará — estado inteiro </h3>
         <div class="big">3.024<span> UCs no funil</span></div>
         <div class="kv"><span>Consumo somado</span><b>24.031 MWh/mês</b></div>
         <div class="kv"><span>Corte aplicado</span><b>≥ 5.000 kWh/mês</b></div>
         <div class="kv"><span>Cidades com UCs</span><b>124 cidades</b></div>
         <div class="kv"><span>Já tinham GD</span><b>373</b></div>
+        
         <div class="ft">Safra 2024-12-31 · atualizado em 08/09/2026
           &nbsp;·&nbsp; <span class="xls" data-x="planilhas/UCs_para.xlsx">planilha .xlsx</span></div>
-      </a></div><h2 class="grupo">Recortes por cidade</h2><div class="grid">
+      </a></div><h3 class="grupo">Recortes por cidade</h3><div class="grid">
       <a class="card" href="cuiaba-varzea-grande.html">
-        <h3>Cuiabá + Várzea Grande — MT</h3>
+        <h3>Cuiabá + Várzea Grande — MT </h3>
         <div class="big">1.122<span> UCs no funil</span></div>
         <div class="kv"><span>Consumo somado</span><b>9.402 MWh/mês</b></div>
         <div class="kv"><span>Corte aplicado</span><b>≥ 5.000 kWh/mês</b></div>
         <div class="kv"><span>Cidades com UCs</span><b>2</b></div>
         <div class="kv"><span>Já tinham GD</span><b>196</b></div>
+        
         <div class="ft">Safra 2024-12-31 · atualizado em 08/09/2026
           &nbsp;·&nbsp; <span class="xls" data-x="planilhas/UCs_cuiaba-varzea-grande.xlsx">planilha .xlsx</span></div>
       </a>
 
       <a class="card" href="imperatriz-e-regiao.html">
-        <h3>Imperatriz + Açailândia + João Lisboa + Davinópolis — MA</h3>
+        <h3>Imperatriz + Açailândia + João Lisboa + Davinópolis — MA </h3>
         <div class="big">351<span> UCs no funil</span></div>
         <div class="kv"><span>Consumo somado</span><b>2.916 MWh/mês</b></div>
         <div class="kv"><span>Corte aplicado</span><b>≥ 5.000 kWh/mês</b></div>
         <div class="kv"><span>Cidades com UCs</span><b>4</b></div>
         <div class="kv"><span>Já tinham GD</span><b>45</b></div>
+        
         <div class="ft">Safra 2024-12-31 · atualizado em 08/09/2026
           &nbsp;·&nbsp; <span class="xls" data-x="planilhas/UCs_imperatriz-e-regiao.xlsx">planilha .xlsx</span></div>
-      </a></div>
+      </a></div></section>
   <div class="nota">
-    <b>Sobre os dados.</b> Fonte: BDGD/ANEEL, safra 31/12/2024 — dado público, sem CNPJ, nome ou
-    titular. A coordenada é a do <b>poste de conexão</b>, não da fachada: prova proximidade, não
+    <b>Duas safras, lado a lado.</b> A BDGD é uma foto anual de 31 de dezembro. A safra
+    <b>2024-12-31</b> é a base de trabalho; a de 2024-12-31 fica abaixo para comparação — é
+    o que permite ver quem cresceu, quem encolheu e quem entrou no funil ao longo do ano.
+    O selo colorido em cada cartão da safra atual mostra a variação de UCs contra o mesmo
+    recorte no ano anterior.
+  </div>
+  <div class="nota">
+    <b>Sobre os dados.</b> Fonte: BDGD/ANEEL — dado público, sem CNPJ, nome ou titular.
+    A coordenada é a do <b>poste de conexão</b>, não da fachada: prova proximidade, não
     titularidade. O consumo é o que passou pelo medidor, então quem já tem geração própria aparece
-    com consumo residual. Clientes de <b>média tensão</b> são removidos da base: quando o mesmo
+    com consumo residual — e quem recebe crédito remoto de fazenda solar de terceiro não aparece
+    marcado de forma alguma. Clientes de <b>média tensão</b> são removidos da base: quando o mesmo
     <code>COD_ID</code> aparece também na tabela de MT, é o mesmo cliente registrado nas duas —
     Grupo A, fora do modelo de geração compartilhada.
   </div>
